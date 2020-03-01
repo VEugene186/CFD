@@ -1,4 +1,4 @@
 #include "constants.h"
 
-extern const double eps = 1e-5;
-extern const int nMax = 21;
+extern const double eps = 1e-8;
+extern const int nMax = 101;

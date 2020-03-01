@@ -2,10 +2,10 @@ clc;
 clear all;
 close all;
 
-nXMin = 5;
-nYMin = 8;
-nXMax = 13;
-nYMax = 12;
+nXMin = 45;
+nYMin = 45;
+nXMax = 55;
+nYMax = 55;
 
 dx = nXMax - nXMin;
 dy = nYMax - nYMin;

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "constants.h"
 #include "Profile.h"
 #include "crvLin.h"
@@ -24,6 +25,42 @@ void free(double ** a) {
         delete [] a[i];
     }
     delete [] a;
+}
+
+void saveMeshForGnuplot() {
+    FILE * f = fopen("meshLines.csv", "w");
+    for (int i = 0; i < nX; i++) {
+        if ((nXMin < i) && (i < nXMax)) {
+            for (int j = 0; j <= nYMin; j++) {
+                fprintf(f, "%.15lg\t%.15lg\n", x[i][j], y[i][j]); }
+            fprintf(f, "\n");
+            for (int j = nYMax; j < nY; j++) {
+                fprintf(f, "%.15lg\t%.15lg\n", x[i][j], y[i][j]); }
+            fprintf(f, "\n");            
+        }
+        else {
+            for (int j = 0; j < nY; j++) {
+                fprintf(f, "%.15lg\t%.15lg\n", x[i][j], y[i][j]); }
+            fprintf(f, "\n");
+        }
+    }
+    for (int j = 0; j < nY; j++) {
+        if ((nYMin < j) && (j < nYMax)) {
+            for (int i = 0; i <= nXMin; i++) {
+                fprintf(f, "%.15lg\t%.15lg\n", x[i][j], y[i][j]); }
+            fprintf(f, "\n");
+            for (int i = nXMax; i < nX; i++) {
+                fprintf(f, "%.15lg\t%.15lg\n", x[i][j], y[i][j]); }
+            fprintf(f, "\n");
+            
+        }
+        else {
+            for (int i = 0; i < nX; i++) {
+                fprintf(f, "%.15lg\t%.15lg\n", x[i][j], y[i][j]); }
+            fprintf(f, "\n");
+        }
+    }
+    fclose(f);
 }
 
 int main(int argc, char * argv[]) {
@@ -57,27 +94,9 @@ int main(int argc, char * argv[]) {
     //turnProfile(nXMin, nYMin, nXMax, nYMa, alpha - alphaLast, xc, yc, x, y);
     computeGrid(nX, nY, nXMin, nYMin, nXMax, nYMax, x, y, eps);
 
-    //FILE * f = fopen("mesh.csv", "w");
-    /*for (int i = 0; i < nX; i++) {
-        for (int j = 0; j < nY; j++) {
-            if ((i >= nXMin) && (i <= nXMax) && (j >= nYMin) && (j <= nYMax)) continue;
-            fprintf(f, "%.15lg\t%.15lg\n", x[i][j], y[i][j]);
-        }
-    }*/
-    FILE * f = fopen("x.csv", "w");
-    for (int j = 0; j < nY; j++) {
-        for (int i = 0; i < nX; i++) {
-            fprintf(f, "%.15lg%c", x[i][j], ((i < nX - 1) ? '\t' : '\n'));
-        }
-    }
-    fclose(f);
-    f = fopen("y.csv", "w");
-    for (int j = 0; j < nY; j++) {
-        for (int i = 0; i < nX; i++) {
-            fprintf(f, "%.15lg%c", y[i][j], ((i < nX - 1) ? '\t' : '\n'));
-        }
-    }
-    fclose(f);
+    saveMeshForGnuplot();
+   
+    system("gnuplot plot.gp");    
     free(x);
     free(y);
     return 0;

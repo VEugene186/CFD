@@ -4,10 +4,10 @@
 
 void setProfile(int nX, int nY, int & nXMin, int & nYMin, int & nXMax, int & nYMax, double ** x, double ** y, 
                 double & xc, double & yc, int & iRib, int & jRib, const char * fileName) {
-    nXMin = 5;
-    nYMin = 8;
-    nXMax = 13;
-    nYMax = 12;
+    nXMin = 45;
+    nYMin = 45;
+    nXMax = 55;
+    nYMax = 55;
 
     iRib = nXMax - 1;
     jRib = 10;

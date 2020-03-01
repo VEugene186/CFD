@@ -39,7 +39,7 @@ double relaxation(double fOld, double fNew, double alpha) {
 }
 
 void computeGrid(int nX, int nY, int nXMin, int nYMin, int nXMax, int nYMax, double ** x, double ** y, double eps) {
-    const double alpha = 1.57;
+    const double alpha = 1.8;
     double epsIter = 0.0;
     MetricCoefficients metrCofij;
     double xNew, yNew;
@@ -69,6 +69,6 @@ void computeGrid(int nX, int nY, int nXMin, int nYMin, int nXMax, int nYMax, dou
             }
         }
         printf("%d | %le\n", kIter, epsIter);
-        if (kIter == 100) break;
+        if (kIter == 1000) break;
     } while (epsIter > eps);
 }
