@@ -1,1 +1,1 @@
-Project concerned with investigation of properties of the finite volume method on rectangular meshes
+Проект направлен на изучение численных методов, используемых в вычислительной гидро- газодинамике

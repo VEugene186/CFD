@@ -69,6 +69,6 @@ void computeGrid(int nX, int nY, int nXMin, int nYMin, int nXMax, int nYMax, dou
             }
         }
         printf("%d | %le\n", kIter, epsIter);
-        if (kIter == 1000) break;
+        if (kIter == 2000) break;
     } while (epsIter > eps);
 }
