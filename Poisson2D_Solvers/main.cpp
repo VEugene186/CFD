@@ -5,7 +5,7 @@
 #include <omp.h>
 
 const int N = 200;
-const int M = 200;
+const int M = 400;
 const double tol = 1e-8;
 
 double ap[N][M], aw[N][M], ae[N][M], as[N][M], an[N][M], b[N][M];
@@ -19,13 +19,29 @@ double residual();
 void init();
 void overRelaxationStd();
 void overRelaxationRedBlack();
+void conjugateGradients();
 void write();
 
 int main(int argc, char * argv[]) {
     makeCoefficients();
     init();
-    overRelaxationRedBlack();
-    //overRelaxationStd();
+    int num = -1;
+    printf("1 - overRelaxationRedBlack\n");
+    printf("2 - overRelaxationStd\n");
+    printf("3 - conjugateGradient\n");
+    printf("Select: ");
+    scanf("%d", &num);
+    switch (num) {
+    case 1:
+        overRelaxationRedBlack();
+        break;
+    case 2:
+        overRelaxationStd();
+        break;
+    case 3:
+        conjugateGradients();
+        break;
+    }
     write();
     return 0;
 }
@@ -88,11 +104,11 @@ double residual() {
     double maxR = 0.0, absR;
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
-            R[i][j] = ap[i][j] * T[i][j] - b[i][j];
-            if (i > 0) R[i][j] -= aw[i][j] * T[i - 1][j];
-            if (i < N - 1) R[i][j] -= ae[i][j] * T[i + 1][j];
-            if (j > 0) R[i][j] -= as[i][j] * T[i][j - 1];
-            if (j < M - 1) R[i][j] -= an[i][j] * T[i][j + 1];
+            R[i][j] = b[i][j] - ap[i][j] * T[i][j];
+            if (i > 0) R[i][j] += aw[i][j] * T[i - 1][j];
+            if (i < N - 1) R[i][j] += ae[i][j] * T[i + 1][j];
+            if (j > 0) R[i][j] += as[i][j] * T[i][j - 1];
+            if (j < M - 1) R[i][j] += an[i][j] * T[i][j + 1];
             absR = fabs(R[i][j]);
             if (maxR < absR) maxR = absR;
         }
@@ -184,6 +200,62 @@ void overRelaxationRedBlack() {
     double fin = omp_get_wtime();
     printf("===Final===\n");
     printf("nIter = %6d | maxR = %.4le\n", nIter, maxR);
+    printf("Time = %lg\n", fin - st);
+}
+
+void conjugateGradients() {
+    double st = omp_get_wtime();
+    int k = 0;
+    double maxR = residual(), absR;
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < M; j++) {
+            p[i][j] = R[i][j];
+        }
+    }
+    printf("nIter = %6d | maxR = %.4le\n", k, maxR);
+
+    double App = 0.0, RR1 = 0.0, RR2 = 0.0, alpha = 0.0, beta = 0.0;
+    while (true) {
+        App = 0.0;
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < M; j++) {
+                AP[i][j] = ap[i][j] * p[i][j];
+                if (i > 0) AP[i][j] -= aw[i][j] * p[i - 1][j];
+                if (i < N - 1) AP[i][j] -= ae[i][j] * p[i + 1][j];
+                if (j > 0) AP[i][j] -= as[i][j] * p[i][j - 1];
+                if (j < M - 1) AP[i][j] -= an[i][j] * p[i][j + 1];
+                
+                App += AP[i][j] * p[i][j];
+                if (k == 0) RR1 += R[i][j] * R[i][j];
+            }
+        }
+        alpha = RR1 / App;
+        maxR = 0.0;
+        RR2 = 0.0;
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < M; j++) {
+                T[i][j] += alpha * p[i][j];
+                R[i][j] -= alpha * AP[i][j];
+                absR = fabs(R[i][j]);
+                if (maxR < absR) maxR = absR;
+                RR2 += R[i][j] * R[i][j];
+            }
+        }
+        maxR /= (dx * dy);
+        k++;
+        if (k % 10 == 0) printf("nIter = %6d | maxR = %.4le\n", k, maxR);
+        if (maxR < tol) break;
+        beta = RR2 / RR1;
+        RR1 = RR2;
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < M; j++) {
+                p[i][j] = p[i][j] * beta + R[i][j];
+            }
+        }
+    }
+    double fin = omp_get_wtime();
+    printf("===Final===\n");
+    printf("nIter = %6d | maxR = %.4le\n", k, maxR);
     printf("Time = %lg\n", fin - st);
 }
 
